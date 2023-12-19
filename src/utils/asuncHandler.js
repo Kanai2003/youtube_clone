@@ -10,10 +10,9 @@ export {asyncHandler};
 
 
 /*
-    // This is another method to handle async errors.
-    // This is a custom middleware that will handle all the errors that are thrown inside the async functions.
-    // It will catch the error and send a response to the client with the error message.
-    // We w
+// This is another method to handle async errors.
+// This is a custom middleware that will handle all the errors that are thrown inside the async functions.
+// It will catch the error and send a response to the client with the error message.
 
 const asyncHandler = (fn) => async(req, res, next) => {
     try{
