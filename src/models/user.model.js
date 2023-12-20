@@ -4,11 +4,6 @@ import jwt from "jsonwebtoken"
 
 const userSchema = new Schema(
     {
-        id: {
-            type: String,
-            required: true,
-            unique: true
-        },
         watchHistory: [
             {
                 type: Schema.Types.ObjectId,
