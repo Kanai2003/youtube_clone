@@ -32,7 +32,7 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String,  //cloudinary url
-            required: true,
+
         },
         coverImage: {
             type: String,    //cloudinary url
@@ -60,8 +60,10 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
 
+
+// An access token is a credential that represents the authorization granted to a client to access specific resources on behalf of a use
 userSchema.methods.generateAccessToken = async function () {
-    jwt.sign(
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -70,20 +72,22 @@ userSchema.methods.generateAccessToken = async function () {
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         },
 
     )
 }
+
+// A refresh token is a long-lived credential used to obtain a new access token when the current access token expires
 userSchema.methods.generateRefreshToken = async function () {
-    jwt.sign(
+    return jwt.sign(
         {
             _id: this._id,
             username: this.username,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         },
 
     )
