@@ -148,8 +148,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -225,7 +225,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id)
 
     const isPasswordMatched = await user.isPasswordCorrect(oldPassword)
-    if (isPasswordMatched) {
+    if (!isPasswordMatched) {
         throw new ApiError(400, "Invalid old password")
     }
 
@@ -243,9 +243,16 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 // Get current user
 const getCurrentUser = asyncHandler(async (req, res) => {
+
+    const user = await User.findById(req.user._id).select("-password -refreshToken")
+    if (!user) {
+        throw new ApiError(404, "User not found")
+    }
     return res
         .status(200)
-        .json(200, req.user, "Current User fetched successfully")
+        .json(
+            new ApiResponse(200, { user }, "Current User fetched successfully")
+        )
 })
 
 // Update current user details
@@ -273,6 +280,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         )
 })
 
+//fix
 // update avatar
 const updateAvatar = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.path
@@ -306,6 +314,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
 
 })
 
+//fix
 const updateCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.files?.path
 
@@ -326,8 +335,8 @@ const updateCoverImage = asyncHandler(async (req, res) => {
                 avatar: coverImage.url
             }
         }, {
-            new: true
-        }
+        new: true
+    }
     ).select("-password -refreshToken")
 
     return res
@@ -339,10 +348,10 @@ const updateCoverImage = asyncHandler(async (req, res) => {
 
 // get user channel profile
 const getUserChannelProfile = asyncHandler(async (req, res) => {
-    const {username} = req.params
+    const { username } = req.params
 
-    if( !username ){
-        throw new ApiError(400, "Username is required")
+    if (!username?.trim()) {
+        throw new ApiError(400, "username is missing")
     }
 
     // mongodb aggregation pipeline
@@ -370,11 +379,11 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         },
         {
             $addFields: {
-                subscribersCount: { 
-                    $size: "$subscribers" 
+                subscribersCount: {
+                    $size: "$subscribers"
                 },
-                channelsSubscribedToCount: { 
-                    $size: "$subscribedTo" 
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
@@ -399,9 +408,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             }
         }
     ])
-    console.log(channel)
 
-    if(!channel?.length){
+    if (!channel?.length) {
         throw new ApiError(404, "Channel not found")
     }
 
@@ -413,12 +421,11 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 })
 
 // 
-const getWatchHistory = asyncHandler( async (req, res) => {
-    
+const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
@@ -427,7 +434,6 @@ const getWatchHistory = asyncHandler( async (req, res) => {
                 localField: "watchHistory",
                 foreignField: "_id",
                 as: "watchHistory",
-
                 pipeline: [
                     {
                         $lookup: {
@@ -435,13 +441,12 @@ const getWatchHistory = asyncHandler( async (req, res) => {
                             localField: "owner",
                             foreignField: "_id",
                             as: "owner",
-
                             pipeline: [
                                 {
                                     $project: {
-                                        username: 1,
                                         fullName: 1,
-                                        avatar: 1,
+                                        username: 1,
+                                        avatar: 1
                                     }
                                 }
                             ]
@@ -464,12 +469,11 @@ const getWatchHistory = asyncHandler( async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                user[0]?.watchHistory, 
+                user[0].watchHistory,
                 "Watch history fetched successfully"
             )
         )
 })
-
 
 
 
