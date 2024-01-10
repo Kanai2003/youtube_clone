@@ -25,6 +25,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 // Register user
+// fix: upload cover image
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, username, email, password } = req.body;
 
@@ -49,10 +50,10 @@ const registerUser = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.avatar[0]?.path;
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-    let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files?.coverImage[0]?.path
-    }
+    // let coverImageLocalPath;
+    // if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+    //     coverImageLocalPath = req.files?.coverImage[0]?.path
+    // }
 
 
     if (!avatarLocalPath) {
@@ -61,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // upload avatar and coverImage on cloudinary from local path
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+    // const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
         throw new ApiError(500, "Something went wrong while uploading avatar")
@@ -73,7 +74,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         avatar: avatar.url,
-        coverImage: coverImage?.url || "",
+        // coverImage: coverImage?.url || "",
     })
 
     const createdUser = await User.findById(newUser._id).select(

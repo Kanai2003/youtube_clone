@@ -8,6 +8,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 
 
 //publish a video
+//fix: upload thumbnail also
 const publishVideo = asyncHandler(async (req, res, next) => {
     const { title, description } = req.body;
 
@@ -23,7 +24,6 @@ const publishVideo = asyncHandler(async (req, res, next) => {
        throw new ApiError(400, "Video is required");
     }
 
-    //fix: upload thumbnail also
     // upload video and thumbnail on cloudinary
     const videoFile = await uploadOnCloudinary(videoPath);
     // const thumbnail = await uploadOnCloudinary(thumbnailPath);

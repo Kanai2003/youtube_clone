@@ -10,8 +10,7 @@ const tweetSchema = new Schema(
             type: String,
             required: true,
         },
-        //fix
-        // including new fields retweets
+        //TODO: including new fields retweets
         // retweets: [
         //     {
         //         type: Schema.Types.ObjectId,
