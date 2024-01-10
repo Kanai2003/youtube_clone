@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { upload } from '../middlewares/multer.middleware.js';
 import {
     refreshAccessToken,
     loginUser,
@@ -12,8 +14,6 @@ import {
     getUserChannelProfile,
     getWatchHistory
 } from '../controllers/user.controller.js';
-import { upload } from '../middlewares/multer.middleware.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 
 
@@ -30,10 +30,11 @@ router
                 name: "avatar",
                 maxCount: 1
             },
-            {
-                name: "coverImage",
-                maxCount: 1
-            }
+            //fix: 
+            // {
+            //     name: "coverImage",
+            //     maxCount: 1
+            // }
         ]),
         registerUser
     )
