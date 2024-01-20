@@ -1,4 +1,4 @@
-import mongoose, {isValidObjectId} from "mongoose";
+import mongoose, {Types, isValidObjectId} from "mongoose";
 import {Video} from "../models/video.model.js";
 import {User} from "../models/user.model.js";
 import {ApiError} from "../utils/ApiError.js";
@@ -6,6 +6,101 @@ import {ApiResponse} from "../utils/ApiResponse.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 
+
+// Get all video
+const getAllVideo = asyncHandler(async (req, res)=> {
+    let {page=1, limit=10, query, sortBy, sortType, userId} = req.query;
+
+    page = isNaN(page)?1 : Number(page)
+    limit = isNaN(limit)?1 : Number(limit)
+
+    if(page <= 0){
+        page =1
+    }
+    if(limit <= 0){
+        limit = 10
+    }
+
+    const pipeline = []
+
+    if(!isValidObjectId(userId)){
+        throw new ApiError(400, "Invalid userId")
+    }
+
+    const user = await User.findById(userId);
+
+    if(!user) {
+        throw new ApiError(400, "User not available with this Id")
+    }
+
+    if(userId){
+        pipeline.push({
+            $match:{
+                owner: new Types.ObjectId(userId)
+            }
+        })
+    }
+
+    //match stages based on text query
+    if(query){
+        pipeline.push({
+            $match: {
+                $or: [
+                    {title: {$regex: query, $options: 'i'}},
+                    {description: {$regex: query, $options: 'i'}}
+                ]
+            }
+        })
+    }
+
+    // sort stage
+    if(sortBy && sortType){
+        const sortTypeValue = sortType==='desc'? -1 : 1;
+        pipeline.push({
+            $sort: { [sortBy]:sortTypeValue }
+        })
+    }
+
+    // populate the owner
+    pipeline.push({
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+            pipeline: [
+                {
+                    $project:{
+                        userName: 1,
+                        fullName: 1,
+                        avatar: 1
+                    }
+                }
+            ]
+        }
+    })
+    // add the calculated owner field
+    pipeline.push({
+        $addFields: {
+            owner: {
+                $first: "$owner"
+            }
+        }
+    })
+
+    const aggregate = Video.aggregate(pipeline)
+
+    Video.aggregatePaginate(aggregate, {page, limit})
+        .then((result)=>{
+            return res
+                .status(200)
+                .json(new ApiResponse(200, result, "Fetched all video successfully!"))
+        })
+        .catch((error) => {
+            throw new ApiError(400, error, "Aggregate Pagination Proble,")
+        })
+
+})
 
 //publish a video
 //fix: upload thumbnail also
@@ -133,13 +228,13 @@ const togglePublisStatus = asyncHandler( async (req, res, next) => {
         .json(new ApiResponse(200, video, "Video visibility updated successfully"));
 })
 
-//TODO: get all videos based on query, sort, pagination
+
 
 export {
+    getAllVideo,
     publishVideo,
     getVideoById,
     updateVideoById,
     deleteVideoById,
     togglePublisStatus
-
 }

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { upload } from '../middlewares/multer.middleware.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 import {
+    getAllVideo,
     publishVideo,
     getVideoById,
     updateVideoById,
@@ -13,6 +14,9 @@ import {
 
 const router = Router()
 
+router
+    .route("/")
+    .get(getAllVideo)
 
 router
     .route("/publish")
