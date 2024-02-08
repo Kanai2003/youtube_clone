@@ -4,6 +4,12 @@
 
 ## Documentation: [Postman API Documentation](https://documenter.getpostman.com/view/27116622/2s9YynkPkS) 
 
+## Access all the APIs:
+### Base URI: [https://youtube-kanai.onrender.com/api/v1/](https://youtube-kanai.onrender.com/api/v1/)
+
+To Check api health condition GET: https://youtube-kanai.onrender.com/healthcheck/
+
+To use all the routes, go through [Postman API Documentation](https://documenter.getpostman.com/view/27116622/2s9YynkPkS)
 
 ## Table of Contents
 - [Description](#description)
