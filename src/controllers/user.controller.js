@@ -256,6 +256,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         )
 })
 
+// fix: error:TypeError: Converting circular structure to JSON &nbsp; &nbsp;--&gt; starting at object with constructor 
 // Update current user details
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { username, fullName, email } = req.body
@@ -277,7 +278,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiError(200, user, "Account details updated successfully")
+            new ApiResponse(200, user, "Account details updated successfully")
         )
 })
 
